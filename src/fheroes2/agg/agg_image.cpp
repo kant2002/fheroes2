@@ -893,9 +893,4 @@ namespace fheroes2
             return height;
         }
     }
-
-    void AGG::clearICNSprites()
-    {
-        _icnVsSprite.clear();
-    }
 }
