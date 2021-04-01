@@ -1,6 +1,7 @@
 #include "pch.h"
 #define CAN_OVERRIDE_RENDERING 1
 #include "agg.h"
+#include "battle_only.h"
 #include "image_tool.h"
 #include "heroes_indicator.h"
 #include "heroes.h"
@@ -8,6 +9,8 @@
 #include "screen.h"
 #include "settings.h"
 #include "translations.h"
+#include <battle_arena.h>
+#include <world.h>
 
 class FakeCursor : public fheroes2::Cursor
 {
@@ -148,3 +151,41 @@ TEST_P( BattleModifierSkills, DrawMoraleModifier )
 INSTANTIATE_TEST_CASE_P( 
     BattleModifierSkillsInstantiation,
     BattleModifierSkills, ::testing::Values( Skill::Level::NONE, Skill::Level::BASIC, Skill::Level::ADVANCED, Skill::Level::EXPERT ) );
+
+
+
+TEST( BattleOnly, BattleOnlyTest )
+{
+    Settings & conf = Settings::Get();
+
+    conf.GetPlayers().Init( Color::RED | Color::BLUE );
+
+    world.NewMaps( 10, 10 );
+
+    // This will trigger autobattle when no interface.
+    Players::SetPlayerControl( Color::RED, CONTROL_HUMAN );
+    Players::SetPlayerControl( Color::BLUE, CONTROL_HUMAN );
+
+    // Select heroes and armies
+    Heroes hero1( Heroes::LORDKILBURN, Race::KNGT );
+    hero1.SetColor( Color::RED );
+    Army army1( &hero1 );
+    army1.Clean();
+    army1.PopBack();
+    army1.PushBack( Monster( Race::KNGT, DWELLING_MONSTER2 ), 100 );
+
+    Heroes hero2( Heroes::SIRGALLANTH, Race::KNGT );
+    hero2.SetColor( Color::BLUE );
+    Army army2( &hero2 );
+    army2.Clean();
+    army2.PopBack();
+    army2.PushBack( Monster( Race::KNGT, DWELLING_MONSTER1 ), 1 );
+    
+    Battle::Arena arena( army1, army2, 0, false );
+
+    EXPECT_TRUE( arena.BattleValid() );
+    arena.Turns();
+    auto & results = arena.GetResult();
+
+    EXPECT_TRUE( results.AttackerWins() );
+}
