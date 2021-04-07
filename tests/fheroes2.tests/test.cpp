@@ -7,6 +7,7 @@
 #include "heroes.h"
 #include "race.h"
 #include "screen.h"
+#include "skill.h"
 #include "settings.h"
 #include "translations.h"
 #include <battle_arena.h>
@@ -185,4 +186,25 @@ TEST( BattleOnly, BattleOnlyTest )
     auto & results = arena.GetResult();
 
     EXPECT_TRUE( results.AttackerWins() );
+}
+
+TEST( Information, NecromancySkillForUnknownHeros )
+{
+    Settings & conf = Settings::Get();
+
+    conf.GetPlayers().Init( Color::RED | Color::BLUE );
+
+    world.NewMaps( 10, 10 );
+
+    // This will trigger autobattle when no interface.
+    Players::SetPlayerControl( Color::RED, CONTROL_HUMAN );
+    Players::SetPlayerControl( Color::BLUE, CONTROL_HUMAN );
+
+    // Select heroes and armies
+    Heroes hero( Heroes::LORDKILBURN, Race::KNGT );
+    hero.SetColor( Color::RED );
+
+    Skill::Secondary skill( Skill::Secondary::NECROMANCY, 1 );
+
+    EXPECT_EQ( std::string("Basic Necromancy allows 10 percent of the creatures killed in combat to be brought back from the dead as Skeletons."), skill.GetDescription( hero ) );
 }
