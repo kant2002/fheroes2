@@ -170,21 +170,18 @@ TEST( BattleOnly, BattleOnlyTest )
     Heroes hero1( Heroes::LORDKILBURN, Race::KNGT );
     hero1.SetColor( Color::RED );
     Army army1( &hero1 );
-    army1.Clean();
-    army1.PopBack();
-    army1.PushBack( Monster( Race::KNGT, DWELLING_MONSTER2 ), 100 );
+    army1.GetTroop( 0 )->Set( Monster::PEASANT, 100 );
 
     Heroes hero2( Heroes::SIRGALLANTH, Race::KNGT );
     hero2.SetColor( Color::BLUE );
     Army army2( &hero2 );
-    army2.Clean();
-    army2.PopBack();
-    army2.PushBack( Monster( Race::KNGT, DWELLING_MONSTER1 ), 1 );
+    army2.GetTroop( 0 )->Set( Monster::PEASANT, 1 );
     
     Battle::Arena arena( army1, army2, 0, false );
 
-    EXPECT_TRUE( arena.BattleValid() );
-    arena.Turns();
+    while ( arena.BattleValid() )
+        arena.Turns();
+
     auto & results = arena.GetResult();
 
     EXPECT_TRUE( results.AttackerWins() );
