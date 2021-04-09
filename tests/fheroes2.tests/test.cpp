@@ -186,7 +186,7 @@ TEST( BattleOnly, BattleOnlyTest )
     EXPECT_TRUE( results.AttackerWins() );
 }
 
-TEST( Information, NecromancySkillForUnknownHeros )
+TEST( Information, NecromancySkillForNecroHeros )
 {
     Settings & conf = Settings::Get();
 
@@ -205,4 +205,27 @@ TEST( Information, NecromancySkillForUnknownHeros )
     Skill::Secondary skill( Skill::Secondary::NECROMANCY, 1 );
 
     EXPECT_EQ( std::string("Basic Necromancy allows 10 percent of the creatures killed in combat to be brought back from the dead as Skeletons."), skill.GetDescription( hero ) );
+}
+
+TEST( Information, NecromancySkillForNonNecroHerosWithArtifacts )
+{
+    Settings & conf = Settings::Get();
+
+    conf.GetPlayers().Init( Color::RED | Color::BLUE );
+
+    world.NewMaps( 10, 10 );
+
+    // This will trigger autobattle when no interface.
+    Players::SetPlayerControl( Color::RED, CONTROL_HUMAN );
+    Players::SetPlayerControl( Color::BLUE, CONTROL_HUMAN );
+
+    // Select heroes and armies
+    Heroes hero( Heroes::LORDKILBURN, Race::KNGT );
+    hero.SetColor( Color::RED );
+    hero.PickupArtifact( Artifact( Artifact::SPADE_NECROMANCY ) );
+
+    Skill::Secondary skill( Skill::Secondary::NECROMANCY, 1 );
+
+    EXPECT_EQ( std::string( "Basic Necromancy (+1) allows 20 percent of the creatures killed in combat to be brought back from the dead as Skeletons." ),
+               skill.GetDescription( hero ) );
 }
