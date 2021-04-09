@@ -69,8 +69,9 @@ protected:
     {
         std::cout << "SetUp"  << std::endl;
         fheroes2::Display & display = fheroes2::Display::instance();
-        display.setRenderingEngine( &imageDisplay );
-        display.setCursor( &cursor );
+        engine = new FakeDisplay();
+        display.setEngine( std::unique_ptr<fheroes2::BaseRenderEngine>( engine ) );
+        display.setCursor( std::unique_ptr<fheroes2::Cursor>( new FakeCursor() ) );
     }
 
     virtual void TearDown() override
@@ -78,20 +79,17 @@ protected:
         std::cout << "TearDown"  << std::endl;
         fheroes2::Display & display = fheroes2::Display::instance();
         display.resize( 1, 1 );
-        display.setRenderingEngine( nullptr );
-        display.setCursor( nullptr );
     }
 
 protected:
-    FakeCursor cursor;
-    FakeDisplay imageDisplay;
+    FakeDisplay * engine;
 };
 
 TEST_P( BattleModifierSkills, DrawLuckModifier )
 {
     fheroes2::Display & display = fheroes2::Display::instance();
     display.resize( 100, 100 );
-    EXPECT_FALSE( imageDisplay.sprite.empty() );
+    EXPECT_FALSE( engine->sprite.empty() );
     const int skill = GetParam();
     std::cout << "DLM" << skill << std::endl;
 
@@ -114,8 +112,8 @@ TEST_P( BattleModifierSkills, DrawLuckModifier )
     dstfile += ".png";
 #endif
 
-    EXPECT_FALSE( imageDisplay.sprite.empty() );
-    fheroes2::Save( imageDisplay.sprite, dstfile, 0 );
+    EXPECT_FALSE( engine->sprite.empty() );
+    fheroes2::Save( engine->sprite, dstfile, 0 );
 
     SUCCEED();
 }
@@ -143,8 +141,8 @@ TEST_P( BattleModifierSkills, DrawMoraleModifier )
     dstfile += ".png";
 #endif
 
-    EXPECT_FALSE( imageDisplay.sprite.empty() );
-    fheroes2::Save( imageDisplay.sprite, dstfile, 0 );
+    EXPECT_FALSE( engine->sprite.empty() );
+    fheroes2::Save( engine->sprite, dstfile, 0 );
 
     SUCCEED();
 }
